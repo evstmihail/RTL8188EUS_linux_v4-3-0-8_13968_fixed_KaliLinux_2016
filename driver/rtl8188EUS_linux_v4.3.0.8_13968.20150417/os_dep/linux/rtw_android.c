@@ -38,6 +38,10 @@
 #include <linux/irq.h>
 #endif
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0))
+#define strnicmp strncasecmp
+#endif
+
 extern void macstr2num(u8 *dst, u8 *src);
 
 const char *android_wifi_cmd_str[ANDROID_WIFI_CMD_MAX] = {
@@ -508,18 +512,7 @@ int rtw_android_priv_cmd(struct net_device *net, struct ifreq *ifr, int cmd)
 		goto exit;
 	}
 #ifdef CONFIG_COMPAT
-	if (is_compat_task()) {
-		/* User space is 32-bit, use compat ioctl */
-		compat_android_wifi_priv_cmd compat_priv_cmd;
 
-		if (copy_from_user(&compat_priv_cmd, ifr->ifr_data, sizeof(compat_android_wifi_priv_cmd))) {
-			ret = -EFAULT;
-			goto exit;
-		}
-		priv_cmd.buf = compat_ptr(compat_priv_cmd.buf);
-		priv_cmd.used_len = compat_priv_cmd.used_len;
-		priv_cmd.total_len = compat_priv_cmd.total_len;
-	} else
 #endif /* CONFIG_COMPAT */
 	if (copy_from_user(&priv_cmd, ifr->ifr_data, sizeof(android_wifi_priv_cmd))) {
 		ret = -EFAULT;
